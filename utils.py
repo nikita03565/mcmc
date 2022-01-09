@@ -1,20 +1,32 @@
-import re
-
-first_letter_idx = ord("а")
-last_letter_idx = ord("я")
-
-
-def get_letter_index(letter):
-    if letter == "":
-        return 0
-    return ord(letter) - first_letter_idx + 1
+import logging
+import sys
+from typing import List
 
 
-def get_letter_from_index(index):
-    return chr(first_letter_idx + index)
+def get_logger(name):
+    logger = logging.Logger(name)
+    handler = logging.StreamHandler(sys.stdout)
+    log_format = logging.Formatter("[%(asctime)s][%(levelname)s] %(message)s")
+    handler.setFormatter(log_format)
+    logger.addHandler(handler)
+    return logger
 
 
-def clear_text(text):
-    """removes a-z characters, repeated spaces and apostrophe"""
-    text_with_removed_chars = re.sub(r"[a-z]", "", text.lower()).replace("'", "")
-    return re.sub(r"\s\s+", " ", text_with_removed_chars)
+def find_best_match(actual_results: List[str], expected: str) -> str:
+    """
+    Finds string from `actual_results` with most characters matching `expected` string
+    """
+    best_error = None
+    best_result = None
+    for result in actual_results:
+        error = 0
+        if len(result) != len(expected):
+            raise ValueError("Strings lengths dont match")
+        for actual_char, expected_char in zip(result.lower(), expected.lower()):
+            if actual_char != expected_char:
+                error += 1
+        if best_error is None or best_error > error:
+            best_error = error
+            best_result = result
+
+    return best_result
